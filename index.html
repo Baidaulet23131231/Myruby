@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0f051d">
+    <meta name="description" content="A little page made with love for Ruby.">
+    <title>For My Beloved Ruby ❤️</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            color-scheme: dark;
+            --primary: #ff3366;
+            --primary-dark: #cc0033;
+            --accent: #ff85a2;
+            --bg-dark: #0f051d;
+            --card-bg: rgba(255, 255, 255, 0.07);
+            --border: rgba(255, 133, 162, 0.23);
+            --text-light: #fff8fb;
+            --text-muted: #e0b0bc;
+            --serif: 'Dancing Script', cursive;
+            --sans: 'Poppins', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 28px;
+        }
+
+        body {
+            min-width: 320px;
+            overflow-x: hidden;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            font-family: var(--sans);
+            line-height: 1.7;
+        }
+
+        button, a {
+            font: inherit;
+        }
+
+        a {
+            color: inherit;
+        }
+
+        button:focus-visible, a:focus-visible {
+            outline: 2px solid #fff;
+            outline-offset: 4px;
+        }
+
+        #bgCanvas {
+            position: fixed;
+            z-index: -1;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .ambient-glow {
+            position: fixed;
+            z-index: -2;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .ambient-glow::before,
+        .ambient-glow::after {
+            position: absolute;
+            width: 38rem;
+            height: 38rem;
+            border-radius: 50%;
+            background: rgba(128, 24, 91, 0.18);
+            content: "";
+            filter: blur(100px);
+        }
+
+        .ambient-glow::before {
+            top: -20rem;
+            left: -17rem;
+        }
+
+        .ambient-glow::after {
+            right: -23rem;
+            bottom: 4rem;
+            background: rgba(255, 51, 102, 0.12);
+        }
+
+        .container {
+            width: min(1080px, calc(100% - 40px));
+            margin-inline: auto;
+        }
+
+        .top-note {
+            position: fixed;
+            z-index: 5;
+            top: 16px;
+            right: 18px;
+            padding: 8px 14px;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            background: rgba(15, 5, 29, 0.72);
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            backdrop-filter: blur(12px);
+        }
+
+        .hero {
+            display: grid;
+            min-height: 100svh;
+            place-items: center;
+            padding: 100px 0 120px;
+            text-align: center;
+        }
+
+        .hero-content {
+            width: min(760px, 100%);
+            animation: rise-in 900ms ease both;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            margin-bottom: 18px;
+            color: var(--accent);
+            font-size: 0.76rem;
+            font-weight: 600;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+        }
+
+        .eyebrow::before, .eyebrow::after {
+            width: 24px;
+            height: 1px;
+            background: var(--accent);
+            content: "";
+            opacity: 0.7;
+        }
+
+        h1, h2, h3, p {
+            overflow-wrap: anywhere;
+        }
+
+        h1 {
+            font-family: var(--serif);
+            font-size: clamp(4rem, 12vw, 8.5rem);
+            font-weight: 700;
+            line-height: 0.98;
+            text-shadow: 0 0 40px rgba(255, 51, 102, 0.25);
+        }
+
+        h1 span {
+            color: var(--accent);
+        }
+
+        .hero-copy {
+            max-width: 550px;
+            margin: 25px auto 32px;
+            color: var(--text-muted);
+            font-size: clamp(0.96rem, 2vw, 1.1rem);
+            font-weight: 300;
+        }
+
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            min-height: 48px;
+            padding: 12px 23px;
+            border: 1px solid transparent;
+            border-radius: 999px;
+            background: linear-gradient(135deg, var(--primary), #e82582);
+            box-shadow: 0 8px 28px rgba(255, 51, 102, 0.25);
+            color: #fff;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: transform 180ms ease, box-shadow 180ms ease;
+        }
+
+        .button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 34px rgba(255, 51, 102, 0.4);
+        }
+
+        .scroll-hint {
+            display: grid;
+            justify-items: center;
+            gap: 6px;
+            margin-top: 55px;
+            color: rgba(224, 176, 188, 0.7);
+            font-size: 0.7rem;
+            letter-spacing: 0.13em;
+            text-transform: uppercase;
+        }
+
+        .scroll-hint span {
+            color: var(--accent);
+            font-size: 1.1rem;
+            animation: bob 1.8s ease-in-out infinite;
+        }
+
+        section.content-section {
+            padding: 100px 0;
+        }
+
+        .section-heading {
+            max-width: 650px;
+            margin: 0 auto 48px;
+            text-align: center;
+        }
+
+        .section-heading h2 {
+            margin-bottom: 12px;
+            font-family: var(--serif);
+            font-size: clamp(2.7rem, 7vw, 4.5rem);
+            font-weight: 700;
+            line-height: 1.1;
+        }
+
+        .section-heading p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .memory-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+        }
+
+        .memory-card, .reason-card, .letter-card {
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            box-shadow: 0 18px 50px rgba(0, 0, 0, 0.16);
+            backdrop-filter: blur(12px);
+        }
+
+        .memory-card {
+            min-height: 205px;
+            padding: 25px;
+            border-radius: 22px;
+            transition: transform 200ms ease, border-color 200ms ease;
+        }
+
+        .memory-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255, 133, 162, 0.55);
+        }
+
+        .card-icon {
+            display: grid;
+            width: 45px;
+            height: 45px;
+            margin-bottom: 17px;
+            place-items: center;
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            background: rgba(255, 51, 102, 0.13);
+            font-size: 1.25rem;
+        }
+
+        .memory-card h3, .reason-card h3 {
+            margin-bottom: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .memory-card p, .reason-card p {
+            color: var(--text-muted);
+            font-size: 0.87rem;
+            font-weight: 300;
+        }
+
+        .reasons-section {
+            position: relative;
+        }
+
+        .reason-list {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+            max-width: 850px;
+            margin: 0 auto;
+        }
+
+        .reason-card {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            padding: 19px 21px;
+            border-radius: 18px;
+        }
+
+        .reason-number {
+            flex: 0 0 auto;
+            color: var(--accent);
+            font-family: var(--serif);
+            font-size: 1.7rem;
+            line-height: 1;
+        }
+
+        .letter-section {
+            padding-bottom: 150px !important;
+        }
+
+        .letter-card {
+            position: relative;
+            max-width: 760px;
+            margin: 0 auto;
+            padding: clamp(28px, 6vw, 58px);
+            border-radius: 28px;
+            text-align: center;
+        }
+
+        .letter-card::before {
+            position: absolute;
+            inset: 8px;
+            border: 1px solid rgba(255, 133, 162, 0.1);
+            border-radius: 21px;
+            content: "";
+            pointer-events: none;
+        }
+
+        .letter-mark {
+            margin-bottom: 6px;
+            color: var(--accent);
+            font-size: 2rem;
+        }
+
+        .letter-card h2 {
+            margin-bottom: 18px;
+            font-family: var(--serif);
+            font-size: clamp(2.5rem, 6vw, 3.7rem);
+        }
+
+        .letter-copy {
+            max-width: 540px;
+            margin: 0 auto 23px;
+            color: var(--text-muted);
+            font-size: 0.96rem;
+            font-weight: 300;
+        }
+
+        .letter-signature {
+            color: var(--accent);
+            font-family: var(--serif);
+            font-size: 2rem;
+        }
+
+        .heart-button {
+            position: relative;
+            z-index: 1;
+            margin-top: 24px;
+            cursor: pointer;
+        }
+
+        .surprise-message {
+            min-height: 1.8em;
+            margin-top: 15px;
+            color: var(--accent);
+            font-size: 0.9rem;
+        }
+
+        footer {
+            padding: 0 20px 30px;
+            color: rgba(224, 176, 188, 0.7);
+            font-size: 0.76rem;
+            text-align: center;
+        }
+
+        nav {
+            position: fixed;
+            z-index: 10;
+            right: 50%;
+            bottom: max(18px, env(safe-area-inset-bottom));
+            display: flex;
+            gap: 6px;
+            width: max-content;
+            max-width: calc(100% - 24px);
+            padding: 8px;
+            transform: translateX(50%);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            background: rgba(15, 5, 29, 0.78);
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.38);
+            backdrop-filter: blur(16px);
+        }
+
+        nav a {
+            padding: 9px 16px;
+            border-radius: 999px;
+            color: var(--text-muted);
+            font-size: 0.79rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: background 160ms ease, color 160ms ease;
+        }
+
+        nav a:hover, nav a.active {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(18px);
+            transition: opacity 650ms ease, transform 650ms ease;
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @keyframes rise-in {
+            from { opacity: 0; transform: translateY(18px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes bob {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(5px); }
+        }
+
+        @media (max-width: 700px) {
+            .hero {
+                min-height: 94svh;
+                padding: 110px 0 100px;
+            }
+
+            section.content-section {
+                padding: 76px 0;
+            }
+
+            .memory-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .memory-card {
+                min-height: auto;
+            }
+
+            .reason-list {
+                grid-template-columns: 1fr;
+            }
+
+            .top-note {
+                top: 12px;
+                right: 12px;
+                font-size: 0.68rem;
+            }
+
+            nav {
+                gap: 1px;
+                padding: 6px;
+            }
+
+            nav a {
+                padding: 9px 12px;
+                font-size: 0.72rem;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                scroll-behavior: auto !important;
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+
+            .reveal {
+                opacity: 1;
+                transform: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="ambient-glow" aria-hidden="true"></div>
+    <canvas id="bgCanvas" aria-hidden="true"></canvas>
+    <div class="top-note">made with love <span aria-hidden="true">♥</span></div>
+
+    <main>
+        <section class="hero" id="home" aria-labelledby="hero-title">
+            <div class="container hero-content">
+                <p class="eyebrow">a little something for you</p>
+                <h1 id="hero-title">For my<br><span>beloved Ruby</span></h1>
+                <p class="hero-copy">For the person who makes ordinary days feel a little more magical. This little corner of the internet is all yours.</p>
+                <a class="button" href="#memories">Open your little surprise <span aria-hidden="true">♥</span></a>
+                <a class="scroll-hint" href="#memories" aria-label="Scroll to the next section">
+                    <span aria-hidden="true">↓</span>
+                    <span>there's more</span>
+                </a>
+            </div>
+        </section>
+
+        <section class="content-section" id="memories" aria-labelledby="memories-title">
+            <div class="container">
+                <div class="section-heading reveal">
+                    <p class="eyebrow">little things, big feelings</p>
+                    <h2 id="memories-title">My favorite kind of magic</h2>
+                    <p>It isn't one big thing. It's all the small, lovely pieces that make you you.</p>
+                </div>
+                <div class="memory-grid">
+                    <article class="memory-card reveal">
+                        <div class="card-icon" aria-hidden="true">☀️</div>
+                        <h3>Your smile</h3>
+                        <p>Somehow, even the longest day feels lighter when you smile.</p>
+                    </article>
+                    <article class="memory-card reveal">
+                        <div class="card-icon" aria-hidden="true">✨</div>
+                        <h3>Your little ways</h3>
+                        <p>The tiny things you do without noticing are the things I remember most.</p>
+                    </article>
+                    <article class="memory-card reveal">
+                        <div class="card-icon" aria-hidden="true">🏡</div>
+                        <h3>Being with you</h3>
+                        <p>Anywhere feels a little more like home when you're there.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section reasons-section" id="reasons" aria-labelledby="reasons-title">
+            <div class="container">
+                <div class="section-heading reveal">
+                    <p class="eyebrow">just a few of many</p>
+                    <h2 id="reasons-title">Reasons I adore you</h2>
+                    <p>If I listed every one, we'd be here all day. So here's a little start.</p>
+                </div>
+                <div class="reason-list">
+                    <article class="reason-card reveal"><span class="reason-number">01</span><div><h3>You make me laugh</h3><p>Even when I really should be trying to act serious.</p></div></article>
+                    <article class="reason-card reveal"><span class="reason-number">02</span><div><h3>You have the kindest heart</h3><p>The care you give to people says everything about you.</p></div></article>
+                    <article class="reason-card reveal"><span class="reason-number">03</span><div><h3>You make little moments special</h3><p>A simple day with you can turn into my favorite memory.</p></div></article>
+                    <article class="reason-card reveal"><span class="reason-number">04</span><div><h3>You are wonderfully you</h3><p>No one else could ever be quite like you, Ruby.</p></div></article>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section letter-section" id="letter" aria-labelledby="letter-title">
+            <div class="container">
+                <article class="letter-card reveal">
+                    <div class="letter-mark" aria-hidden="true">♡</div>
+                    <p class="eyebrow">one last thing</p>
+                    <h2 id="letter-title">A note for you</h2>
+                    <p class="letter-copy">Ruby, I hope you never forget how special you are. Thank you for being exactly who you are, for every smile, every little moment, and for making the world feel brighter just by being in it. You deserve all the love in the world — today and every day.</p>
+                    <p class="letter-signature">Always yours <span aria-hidden="true">♥</span></p>
+                    <button class="button heart-button" id="surpriseButton" type="button">Send a little love <span aria-hidden="true">💌</span></button>
+                    <p class="surprise-message" id="surpriseMessage" aria-live="polite"></p>
+                </article>
+            </div>
+        </section>
+    </main>
+
+    <footer>made with love, just for Ruby <span aria-hidden="true">♥</span></footer>
+
+    <nav aria-label="Main navigation">
+        <a href="#home" class="active">Home</a>
+        <a href="#memories">Little things</a>
+        <a href="#reasons">Reasons</a>
+        <a href="#letter">A note</a>
+    </nav>
+
+    <script>
+        const canvas = document.getElementById('bgCanvas');
+        const context = canvas.getContext('2d');
+        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        let hearts = [];
+        let width = 0;
+        let height = 0;
+        let animationFrame;
+
+        function resizeCanvas() {
+            const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width * pixelRatio;
+            canvas.height = height * pixelRatio;
+            context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+            hearts = Array.from({ length: Math.min(32, Math.floor(width / 28)) }, () => ({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                size: 5 + Math.random() * 11,
+                speed: 0.15 + Math.random() * 0.38,
+                drift: (Math.random() - 0.5) * 0.28,
+                opacity: 0.12 + Math.random() * 0.3
+            }));
+        }
+
+        function drawHeart(heart) {
+            const { x, y, size, opacity } = heart;
+            context.save();
+            context.translate(x, y);
+            context.scale(size / 20, size / 20);
+            context.beginPath();
+            context.moveTo(0, 7);
+            context.bezierCurveTo(-12, -1, -7, -9, 0, -3);
+            context.bezierCurveTo(7, -9, 12, -1, 0, 7);
+            context.fillStyle = `rgba(255, 101, 147, ${opacity})`;
+            context.fill();
+            context.restore();
+        }
+
+        function animateHearts() {
+            context.clearRect(0, 0, width, height);
+            hearts.forEach((heart) => {
+                drawHeart(heart);
+                if (!reducedMotion) {
+                    heart.y -= heart.speed;
+                    heart.x += heart.drift;
+                    if (heart.y < -20) {
+                        heart.y = height + 20;
+                        heart.x = Math.random() * width;
+                    }
+                    if (heart.x < -20) heart.x = width + 20;
+                    if (heart.x > width + 20) heart.x = -20;
+                }
+            });
+            if (!reducedMotion) animationFrame = window.requestAnimationFrame(animateHearts);
+        }
+
+        resizeCanvas();
+        animateHearts();
+        window.addEventListener('resize', () => {
+            window.cancelAnimationFrame(animationFrame);
+            resizeCanvas();
+            animateHearts();
+        });
+
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    revealObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.12 });
+
+        document.querySelectorAll('.reveal').forEach((element) => revealObserver.observe(element));
+
+        const navLinks = [...document.querySelectorAll('nav a')];
+        const sectionObserver = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    navLinks.forEach((link) => {
+                        const selected = link.getAttribute('href') === `#${entry.target.id}`;
+                        link.classList.toggle('active', selected);
+                        if (selected) link.setAttribute('aria-current', 'location');
+                        else link.removeAttribute('aria-current');
+                    });
+                }
+            });
+        }, { rootMargin: '-35% 0px -55% 0px' });
+
+        document.querySelectorAll('main section[id]').forEach((section) => sectionObserver.observe(section));
+
+        const surpriseButton = document.getElementById('surpriseButton');
+        const surpriseMessage = document.getElementById('surpriseMessage');
+        surpriseButton.addEventListener('click', () => {
+            surpriseMessage.textContent = 'If you needed a sign: you are loved, Ruby. Always. ♥';
+            surpriseButton.textContent = 'A whole lot of love for you ♥';
+            surpriseButton.disabled = true;
+        });
+    </script>
+</body>
+</html>
